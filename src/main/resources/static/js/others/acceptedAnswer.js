@@ -1,0 +1,1 @@
+let acceptedAnswerPiechartRaw = {"Accepted Question": 339, "Not Accepted Question": 961}

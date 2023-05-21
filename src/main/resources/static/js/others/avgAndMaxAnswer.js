@@ -1,0 +1,1 @@
+let avgAndMaxAnswerRaw = {"Max": 62, "Average": 1}
