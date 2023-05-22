@@ -1,0 +1,1 @@
+let goodNonAnswerPiechartRaw = {"goodNonAnswer Question": 49, "Not GoodNonAnswer Question": 1251}

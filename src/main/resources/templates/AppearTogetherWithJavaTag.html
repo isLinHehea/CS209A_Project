@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>7</title>
+  <!--  Import echarts lib by CDN, you can also import from local files  -->
+  <script src='https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2/dist/echarts-wordcloud.min.js"></script>
+  <!--  Import the data files  -->
+  <script src='../js/Tags/AppearTogetherWithJavaTag.js'></script>
+</head>
+<body>
+<div style="width: 100%;height: 70vh;display: flex;align-items: center;justify-content: center;">
+  <div id="wordcloud" style="height: 100%;width: 100%"></div>
+</div>
+</body>
+
+<script>
+  <!--  echarts configuration  -->
+  let wordcloud = echarts.init(document.getElementById('wordcloud'));
+  let wordcloudData = [];
+  for (const key in wordcloudRaw) {
+    wordcloudData.push({
+      name: key,
+      value: wordcloudRaw[key]
+    });
+  }
+  let wordcloudOption = {
+    title: {
+      text: 'Which tags frequently appear together with the java tag?',
+      textStyle: {
+        fontStyle: 'oblique',
+        fontSize: 20,
+        color: '#4cc9f0'
+      },
+      left: 'center'
+    },
+    tooltip: {},
+    series: [{
+      type: 'wordCloud',
+      shape: {
+        cloudGrow: 0.2
+      },
+      sizeRange: [10, 60],
+      rotationRange: [-30, 30],
+      gridSize: 2,
+      drawOutOfBound: false,
+      layoutAnimation: true,
+      keepAspect: true,
+      textStyle: {
+        fontWeight: 'bold',
+        color: function () {
+          return 'rgb(' + [
+            Math.round(Math.random() * 160),
+            Math.round(Math.random() * 160),
+            Math.round(Math.random() * 160)
+          ].join(',') + ')';
+        }
+      },
+      emphasis: {
+        textStyle: {
+          shadowBlur: 15,
+          shadowColor: '#333'
+        }
+      },
+      data: wordcloudData.sort(function (a, b) {
+        return b.value - a.value;
+      })
+    }]
+  };
+  wordcloud.setOption(wordcloudOption);
+</script>
+
+</html>

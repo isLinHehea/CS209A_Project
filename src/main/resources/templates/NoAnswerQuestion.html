@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>1</title>
+  <!--  Import echarts lib by CDN, you can also import from local files  -->
+  <script src='https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js'></script>
+  <!--  Import the data files  -->
+  <script src='../js/Number_of_Answers/NoAnswerQuestion.js'></script>
+</head>
+<body>
+<div style="width: 100%;height: 70vh;display: flex;align-items: center;justify-content: center;">
+  <div id="piechart" style="height: 100%;width: 70%"></div>
+</div>
+</body>
+
+<script>
+  <!--  echarts configuration  -->
+  let piechart = echarts.init(document.getElementById('piechart'));
+  let piechartData = [];
+  for (const key in piechartRaw) {
+    piechartData.push({
+      name: key,
+      value: piechartRaw[key]
+    });
+  }
+  let pieOption = {
+    title: {
+      text: 'What percentage of questions do not have any answer?',
+      textStyle: {
+        fontStyle: 'oblique',
+        fontSize: 17,
+        color: '#4cc9f0'
+      },
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item'
+    },
+    grid: {
+      width: '100%',
+      height: '100%'
+    },
+    legend: {
+      orient: 'vertical',
+      textStyle: {
+        fontSize: 20,
+        color: 'black'
+      },
+      right: 'center',
+      bottom: 'bottom',
+    },
+    series: [
+      {
+        name: 'Problem Count',
+        type: 'pie',
+        radius: '80%',
+        data: piechartData,
+        color: ['#B147FF', '#FF80FF', '#7AA7FF', '#7CEA83',
+          '#FFC460', '#FFA57B', '#FF405C', '#4166FF'],
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0.1, 0.2, 0, 0.5)',
+          }
+        },
+        itemStyle: {
+          normal: {
+            label: {
+              textStyle: {
+                fontSize: 12,
+                color: 'black'
+              }
+            }
+          }
+        }
+      }
+    ]
+  };
+  piechart.setOption(pieOption);
+</script>
+
+</html>

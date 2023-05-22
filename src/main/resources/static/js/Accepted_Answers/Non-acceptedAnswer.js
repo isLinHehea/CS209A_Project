@@ -1,0 +1,1 @@
+let piechartRaw = {"No accepted answer": 77, "Has accepted answer": 33}

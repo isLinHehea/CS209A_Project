@@ -1,0 +1,1 @@
+let barchartRaw = {"Maximum": 77, "Average": 33}
