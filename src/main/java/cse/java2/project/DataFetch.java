@@ -214,11 +214,9 @@ public class DataFetch {
             PreparedStatement statement = con.prepareStatement(sql);
             statement.setInt(1, n - 1);
             ResultSet resultSet = statement.executeQuery();
-
             if (resultSet.next()) {
                 id = resultSet.getInt("question_id");
             }
-
             resultSet.close();
             statement.close();
         } catch (SQLException e) {
@@ -248,7 +246,6 @@ public class DataFetch {
             preparedStatement.setInt(1, s);
             preparedStatement.setInt(2, n);
             int re = preparedStatement.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }

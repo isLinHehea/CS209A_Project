@@ -43,7 +43,61 @@ public class DataAnalyze {
 
     public static void main(String[] args) {
         getConnection();
-
+        QuestionAnswerNumber();
+        QuestionAnswerEvaluation();
+        AnswerNumberDistribution();
+        QuestionAcceptedAnswerNumber();
+        QuestionResolutionTimeDistribution();
+        MoreUpvotesNon_acceptedAnswer();
+        AppearTogetherWithJavaTag();
+        TheMostUpvotesTag();
+        TheMostViewsTag();
+        ParticipationDistribution();
+        TheMostActiveUser();
         closeConnection();
+    }
+
+    public static void QuestionAnswerNumber() {
+
+    }
+
+    public static void QuestionAnswerEvaluation() {
+
+    }
+
+    public static void AnswerNumberDistribution() {
+
+    }
+
+    public static void QuestionAcceptedAnswerNumber() {
+
+    }
+
+    public static void QuestionResolutionTimeDistribution() {
+
+    }
+
+    public static void MoreUpvotesNon_acceptedAnswer() {
+
+    }
+
+    public static void AppearTogetherWithJavaTag() {
+
+    }
+
+    public static void TheMostUpvotesTag() {
+
+    }
+
+    public static void TheMostViewsTag() {
+
+    }
+
+    public static void ParticipationDistribution() {
+
+    }
+
+    public static void TheMostActiveUser() {
+
     }
 }
