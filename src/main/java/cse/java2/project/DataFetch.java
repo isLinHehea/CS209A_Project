@@ -27,11 +27,9 @@ public class DataFetch {
             System.err.println("Cannot find the PostgreSQL driver. Check CLASSPATH.");
             System.exit(1);
         }
-
         try {
             String url = "jdbc:postgresql://localhost:5432/postgres";
             con = DriverManager.getConnection(url, user, pwd);
-
         } catch (SQLException e) {
             System.err.println("Database connection failed");
             System.err.println(e.getMessage());
@@ -63,7 +61,7 @@ public class DataFetch {
                 order, sort, tagged, site);
             int page = 1;
             int fetchedCount = 0;
-            while (fetchedCount < 500) {
+            while (fetchedCount < 2000) {
                 URL url = new URL(apiUrl + "?page=" + page + "&pagesize=" + pageSize + apiParams);
                 HttpURLConnection connection1 = (HttpURLConnection) url.openConnection();
                 connection1.setRequestMethod("GET");
@@ -122,7 +120,7 @@ public class DataFetch {
                 page++;
             }
             closeConnection();
-            System.out.println("数据导入完成！");
+            System.out.println("Data import successfully!");
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -130,7 +128,7 @@ public class DataFetch {
         } finally {
             try {
                 getConnection();
-                for (int m = 1; m <= 500; m++) {
+                for (int m = 1; m <= 2000; m++) {
                     int s = getId(m);
                     String apiParams = String.format("/answers?order=%s&sort=%s&site=%s",
                         order, sort, site);
@@ -173,7 +171,7 @@ public class DataFetch {
                     updateUpvote(mostUpvoteAnswer, s);
                 }
                 closeConnection();
-                System.out.println("数据修改完成！");
+                System.out.println("Data modification successfully!");
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
