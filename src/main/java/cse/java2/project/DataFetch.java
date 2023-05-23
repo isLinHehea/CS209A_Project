@@ -58,8 +58,16 @@ public class DataFetch {
         int pageSize = 100;
         try {
             getConnection();
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+            String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s",
+                order, sort, tagged, site);
+=======
+>>>>>>> Stashed changes
             String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s&filter=!6Wfm_gRpwRo5e",
                     order, sort, tagged, site);
+>>>>>>> f9868bfbe0fe2222265717cb18d9966c802ff656
             int page = 1;
             int fetchedCount = 0;
             while (fetchedCount < 500) {
@@ -69,7 +77,7 @@ public class DataFetch {
                 BufferedReader in;
                 if ("gzip".equals(connection1.getContentEncoding())) {
                     in = new BufferedReader(
-                            new InputStreamReader(new GZIPInputStream(connection1.getInputStream())));
+                        new InputStreamReader(new GZIPInputStream(connection1.getInputStream())));
                 } else {
                     in = new BufferedReader(new InputStreamReader(connection1.getInputStream()));
                 }
@@ -97,9 +105,9 @@ public class DataFetch {
                     boolean isAnswered = item.getBoolean("is_answered");
                     int answerCount = item.has("answer_count") ? item.getInt("answer_count") : 0;
                     int acceptedAnswerId =
-                            item.has("accept_answer_id") ? item.getInt("accept_answer_id") : 0;
+                        item.has("accept_answer_id") ? item.getInt("accept_answer_id") : 0;
                     int questionPostingTime =
-                            item.has("creation_date") ? item.getInt("creation_date") : 0;
+                        item.has("creation_date") ? item.getInt("creation_date") : 0;
                     int answerPostingTime = 0;
                     int most_upvote_answer_id = 0;
                     int comments = item.has("comment_count") ? item.getInt("comment_count") : 0;
@@ -116,8 +124,16 @@ public class DataFetch {
                     int views = item.has("view_count") ? item.getInt("view_count") : 0;
                     int userCount = views + 1;
                     insertData(con, ownerId, questionId, isAnswered,
+<<<<<<< HEAD
+                        answerCount, acceptedAnswerId, questionPostingTime, answerPostingTime
+                        , most_upvote_answer_id, tags, upvote, views, userCount);
+=======
                             answerCount, acceptedAnswerId, questionPostingTime, answerPostingTime
                             , most_upvote_answer_id, tags, upvote, views, userCount,comments);
+<<<<<<< Updated upstream
+=======
+>>>>>>> f9868bfbe0fe2222265717cb18d9966c802ff656
+>>>>>>> Stashed changes
                 }
                 fetchedCount += items.length();
                 page++;
@@ -133,19 +149,21 @@ public class DataFetch {
                 getConnection();
                 for (int m = 1; m <= 500; m++) {
                     int s = getId(m);
-                    if (!getIsAnswered(s)) continue;
+                    if (!getIsAnswered(s)) {
+                        continue;
+                    }
                     String apiParams = String.format("/answers?order=%s&sort=%s&site=%s",
-                            order, sort, site);
+                        order, sort, site);
                     URL url = new URL(apiUrl + "/" + s + apiParams);
                     HttpURLConnection connection1 = (HttpURLConnection) url.openConnection();
                     connection1.setRequestMethod("GET");
                     BufferedReader in;
                     if ("gzip".equals(connection1.getContentEncoding())) {
                         in = new BufferedReader(new InputStreamReader(
-                                new GZIPInputStream(connection1.getInputStream())));
+                            new GZIPInputStream(connection1.getInputStream())));
                     } else {
                         in = new BufferedReader(
-                                new InputStreamReader(connection1.getInputStream()));
+                            new InputStreamReader(connection1.getInputStream()));
                     }
                     StringBuilder response = new StringBuilder();
                     String line;
@@ -171,7 +189,7 @@ public class DataFetch {
                         }
                         int vote = item.has("up_vote_count") ? item.getInt("up_vote_count") : 0;
                         boolean isAccepted =
-                                item.has("is_accepted") && item.getBoolean("is_accepted");
+                            item.has("is_accepted") && item.getBoolean("is_accepted");
                         if (isAccepted) {
                             int answerPosting = item.getInt("creation_date");
                             updateData(answerPosting, s);
@@ -240,6 +258,15 @@ public class DataFetch {
 
 
     private static void insertData(Connection connection, String ownerId, int questionId,
+<<<<<<< HEAD
+        boolean isAnswered, int answerCount,
+        int acceptedAnswerId, int questionPostingTime, int answerPostingTime,
+        int most_upvote_answer_id,
+        String tags, int upvote, int views, int userCount) throws SQLException, SQLException {
+        String insertQuery = "INSERT INTO question (owner_id,question_id,is_answered," +
+            "answer_numbers,accepted_answer_id,question_posting_time,answer_posting_time," +
+            "most_upvote_answer_id,tags,upvote,views,user_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+=======
                                    boolean isAnswered, int answerCount,
                                    int acceptedAnswerId, int questionPostingTime, int answerPostingTime,
                                    int most_upvote_answer_id, String tags,
@@ -247,6 +274,10 @@ public class DataFetch {
         String insertQuery = "INSERT INTO question (owner_id,question_id,is_answered," +
                 "answer_numbers,accepted_answer_id,question_posting_time,answer_posting_time," +
                 "most_upvote_answer_id,tags,upvote,views,user_count,comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+<<<<<<< Updated upstream
+=======
+>>>>>>> f9868bfbe0fe2222265717cb18d9966c802ff656
+>>>>>>> Stashed changes
         PreparedStatement statement = connection.prepareStatement(insertQuery);
         statement.setString(1, ownerId);
         statement.setInt(2, questionId);

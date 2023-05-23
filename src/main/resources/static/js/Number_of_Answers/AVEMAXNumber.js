@@ -1,1 +1,1 @@
-let barchartRaw = {"Maximum": 77, "Average": 33}
+let barchartRaw = {"Maximum": 40, "Average": 2}
