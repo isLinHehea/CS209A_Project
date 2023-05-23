@@ -65,4 +65,9 @@ public class MyController {
     public String q11() {
         return "TheMostActiveUser";
     }
+
+    @GetMapping({"/Visualization/FrequentlyDiscussedAPIs"})
+    public String q12() {
+        return "FrequentlyDiscussedAPIs";
+    }
 }

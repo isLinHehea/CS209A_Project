@@ -711,4 +711,53 @@ public class DataAnalyze {
                 "An error occurred while modifying the JavaScript file: " + e.getMessage());
         }
     }
+    public static void FrequentlyDiscussedAPIs(String str) throws SQLException {
+        String filePath = "src/main/resources/static/js/User/TheMostActiveUser.js";
+
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "select owner_id, (question_numbers + answer_numbers + comment_numbers) as sum\n"
+                + "from owner;");
+        Map<String, Integer> users = new HashMap<>();
+        while (rs.next()) {
+            String tagsStr = rs.getString(1);
+            int upvoteNum = rs.getInt(2);
+            String[] usersResult = tagsStr.split(",");
+            for (int i = 0; i < usersResult.length; i++) {
+                String tag = usersResult[i];
+                if (users.containsKey(tag)) {
+                    users.replace(tag, users.get(tag) + upvoteNum);
+                } else {
+                    users.put(tag, 1);
+                }
+            }
+        }
+        Map<String, Integer> usersFinal = users.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .limit(30)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("let " + str + " =")) {
+                    Map<String, Integer> values = extractValues(line);
+                    values.clear();
+                    values.putAll(usersFinal);
+                    String modifiedLine = generateModifiedLine(str, values);
+                    line = line.replaceFirst("let " + str + " =.*", modifiedLine);
+                }
+                content.append(line).append("\n");
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                writer.write(content.toString());
+            }
+            System.out.println("JavaScript file modified successfully.");
+        } catch (IOException e) {
+            System.out.println(
+                "An error occurred while modifying the JavaScript file: " + e.getMessage());
+        }
+    }
 }
