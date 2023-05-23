@@ -65,8 +65,8 @@ public class DataAnalyze {
         AppearTogetherWithJavaTag("wordcloudRaw");
         TheMostUpvotesTag("wordcloudRaw");
         TheMostViewsTag("wordcloudRaw");
-//        ParticipationDistribution();
-//        TheMostActiveUser();
+        ParticipationDistribution("piechartRaw");
+        TheMostActiveUser("wordcloudRaw");
         closeConnection();
     }
 
@@ -583,11 +583,132 @@ public class DataAnalyze {
         }
     }
 
-    public static void ParticipationDistribution() {
+    public static void ParticipationDistribution(String str) throws SQLException {
+        String filePath = "src/main/resources/static/js/Users/ParticipationDistribution.js";
 
+        Statement stmt = con.createStatement();
+        ResultSet rs0 = stmt.executeQuery("select count(*)\n"
+            + "from (select (answer_numbers + comment + 1) as sum\n"
+            + "      from question) l\n"
+            + "where sum >= 1\n"
+            + "  and sum <= 10;");
+        rs0.next();
+        int first = rs0.getInt(1);
+
+        ResultSet rs1 = stmt.executeQuery("select count(*)\n"
+            + "from (select (answer_numbers + comment + 1) as sum\n"
+            + "      from question) l\n"
+            + "where sum > 10\n"
+            + "  and sum <= 20;");
+        rs1.next();
+        int second = Math.round(rs1.getFloat(1));
+
+        ResultSet rs2 = stmt.executeQuery("select count(*)\n"
+            + "from (select (answer_numbers + comment + 1) as sum\n"
+            + "      from question) l\n"
+            + "where sum > 20\n"
+            + "  and sum <= 30;");
+        rs2.next();
+        int third = Math.round(rs2.getFloat(1));
+
+        ResultSet rs3 = stmt.executeQuery("select count(*)\n"
+            + "from (select (answer_numbers + comment + 1) as sum\n"
+            + "      from question) l\n"
+            + "where sum > 30\n"
+            + "  and sum <= 40;");
+        rs3.next();
+        int fourth = Math.round(rs3.getFloat(1));
+
+        ResultSet rs4 = stmt.executeQuery("select count(*)\n"
+            + "from (select (answer_numbers + comment + 1) as sum\n"
+            + "      from question) l\n"
+            + "where sum > 40;");
+        rs4.next();
+        int fifth = Math.round(rs4.getFloat(1));
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("let " + str + " =")) {
+                    Map<String, Integer> values = extractValues(line);
+                    if (values.containsKey(">= 1 & <= 10")) {
+                        values.put(">= 1 & <= 10", first);
+                    }
+                    if (values.containsKey("> 10 & <= 20")) {
+                        values.put("> 10 & <= 20", second);
+                    }
+                    if (values.containsKey("> 20 & <= 30")) {
+                        values.put("> 20 & <= 30", third);
+                    }
+                    if (values.containsKey("> 30 & <= 40")) {
+                        values.put("> 30 & <= 40", fourth);
+                    }
+                    if (values.containsKey("> 40")) {
+                        values.put("> 40", fifth);
+                    }
+                    String modifiedLine = generateModifiedLine(str, values);
+                    line = line.replaceFirst("let " + str + " =.*", modifiedLine);
+                }
+                content.append(line).append("\n");
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                writer.write(content.toString());
+            }
+            System.out.println("JavaScript file modified successfully.");
+        } catch (IOException e) {
+            System.out.println(
+                "An error occurred while modifying the JavaScript file: " + e.getMessage());
+        }
     }
 
-    public static void TheMostActiveUser() {
+    public static void TheMostActiveUser(String str) throws SQLException {
+        String filePath = "src/main/resources/static/js/Users/TheMostActiveUser.js";
 
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "select owner_id, (question_numbers + answer_numbers + comment_numbers) as sum\n"
+                + "from owner;");
+        Map<String, Integer> users = new HashMap<>();
+        while (rs.next()) {
+            String tagsStr = rs.getString(1);
+            int upvoteNum = rs.getInt(2);
+            String[] usersResult = tagsStr.split(",");
+            for (int i = 0; i < usersResult.length; i++) {
+                String tag = usersResult[i];
+                if (users.containsKey(tag)) {
+                    users.replace(tag, users.get(tag) + upvoteNum);
+                } else {
+                    users.put(tag, 1);
+                }
+            }
+        }
+        Map<String, Integer> usersFinal = users.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .limit(30)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("let " + str + " =")) {
+                    Map<String, Integer> values = extractValues(line);
+                    values.clear();
+                    values.putAll(usersFinal);
+                    String modifiedLine = generateModifiedLine(str, values);
+                    line = line.replaceFirst("let " + str + " =.*", modifiedLine);
+                }
+                content.append(line).append("\n");
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                writer.write(content.toString());
+            }
+            System.out.println("JavaScript file modified successfully.");
+        } catch (IOException e) {
+            System.out.println(
+                "An error occurred while modifying the JavaScript file: " + e.getMessage());
+        }
     }
 }
