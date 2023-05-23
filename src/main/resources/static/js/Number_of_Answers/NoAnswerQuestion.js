@@ -1,1 +1,1 @@
-let piechartRaw = {"No answer": 77, "Has answer": 33}
+let piechartRaw = {"No answer": 78, "Has answer": 32}

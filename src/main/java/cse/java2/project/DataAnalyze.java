@@ -51,7 +51,7 @@ public class DataAnalyze {
 
     public static void main(String[] args) {
 //        getConnection();
-        QuestionAnswerNumber();
+        QuestionAnswerNumber("piechartRaw");
         QuestionAnswerEvaluation();
         AnswerNumberDistribution();
         QuestionAcceptedAnswerNumber();
@@ -65,8 +65,8 @@ public class DataAnalyze {
 //        closeConnection();
     }
 
-    public static void QuestionAnswerNumber() {
-        String filePath = "src/main/java/cse/java2/project/NoAnswerQuestion.js";
+    public static void QuestionAnswerNumber(String str) {
+        String filePath = "src/main/resources/static/js/Number_of_Answers/NoAnswerQuestion.js";
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             StringBuilder content = new StringBuilder();
             String line;
@@ -74,7 +74,7 @@ public class DataAnalyze {
             // Read the file line by line
             while ((line = reader.readLine()) != null) {
                 // Find the line containing the piechartRaw object
-                if (line.contains("let piechartRaw =")) {
+                if (line.contains("let " + str + " =")) {
                     // Extract the key-value pairs from the piechartRaw object
                     Map<String, Integer> values = extractValues(line);
 
@@ -90,10 +90,10 @@ public class DataAnalyze {
                     }
 
                     // Generate the modified piechartRaw line
-                    String modifiedLine = generateModifiedLine(values);
+                    String modifiedLine = generateModifiedLine(str, values);
 
                     // Replace the original piechartRaw line with the modified line
-                    line = line.replaceFirst("let piechartRaw =.*", modifiedLine);
+                    line = line.replaceFirst("let " + str + " =.*", modifiedLine);
                 }
 
                 // Append the modified line to the content
@@ -129,9 +129,9 @@ public class DataAnalyze {
         return values;
     }
 
-    private static String generateModifiedLine(Map<String, Integer> values) {
+    private static String generateModifiedLine(String str, Map<String, Integer> values) {
         StringBuilder line = new StringBuilder();
-        line.append("let piechartRaw = {");
+        line.append("let ").append(str).append(" = {");
 
         // Generate the modified key-value pairs
         for (Map.Entry<String, Integer> entry : values.entrySet()) {
