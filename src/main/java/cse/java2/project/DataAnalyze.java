@@ -458,7 +458,7 @@ public class DataAnalyze {
         }
         Map<String, Integer> tagsFinal = tags.entrySet().stream()
             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-            .limit(30)
+            .limit(50)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
@@ -507,7 +507,7 @@ public class DataAnalyze {
         }
         Map<String, Integer> tagsFinal = tags.entrySet().stream()
             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-            .limit(30)
+            .limit(50)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
@@ -535,7 +535,7 @@ public class DataAnalyze {
     }
 
     public static void TheMostViewsTag(String str) throws SQLException {
-        String filePath = "src/main/resources/static/js/Tag/TheMostUpvotesTag.js";
+        String filePath = "src/main/resources/static/js/TheMostViewsTag.js";
 
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select tags, views\n"
@@ -556,7 +556,7 @@ public class DataAnalyze {
         }
         Map<String, Integer> tagsFinal = tags.entrySet().stream()
             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-            .limit(30)
+            .limit(50)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
@@ -584,7 +584,7 @@ public class DataAnalyze {
     }
 
     public static void ParticipationDistribution(String str) throws SQLException {
-        String filePath = "src/main/resources/static/js/Users/ParticipationDistribution.js";
+        String filePath = "src/main/resources/static/js/User/ParticipationDistribution.js";
 
         Statement stmt = con.createStatement();
         ResultSet rs0 = stmt.executeQuery("select count(*)\n"
@@ -663,7 +663,7 @@ public class DataAnalyze {
     }
 
     public static void TheMostActiveUser(String str) throws SQLException {
-        String filePath = "src/main/resources/static/js/Users/TheMostActiveUser.js";
+        String filePath = "src/main/resources/static/js/User/TheMostActiveUser.js";
 
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery(
