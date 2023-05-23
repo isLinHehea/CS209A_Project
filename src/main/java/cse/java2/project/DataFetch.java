@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.*;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 
 import org.json.JSONArray;
@@ -57,7 +58,7 @@ public class DataFetch {
         int pageSize = 100;
         try {
             getConnection();
-            String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s",
+            String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s&filter=!6Wfm_gRpwRo5e",
                     order, sort, tagged, site);
             int page = 1;
             int fetchedCount = 0;
@@ -90,6 +91,7 @@ public class DataFetch {
                         } else {
                             ownerId = owner.getString("display_name");
                         }
+                        updateOwner(ownerId, "question");
                     }
                     int questionId = item.getInt("question_id");
                     boolean isAnswered = item.getBoolean("is_answered");
@@ -100,6 +102,7 @@ public class DataFetch {
                             item.has("creation_date") ? item.getInt("creation_date") : 0;
                     int answerPostingTime = 0;
                     int most_upvote_answer_id = 0;
+                    int comments = item.has("comment_count") ? item.getInt("comment_count") : 0;
                     JSONArray tagArray = item.getJSONArray("tags");
                     StringBuilder sb = new StringBuilder();
                     for (int j = 0; j < tagArray.length(); j++) {
@@ -109,12 +112,12 @@ public class DataFetch {
                     }
                     sb.deleteCharAt(sb.length() - 1);
                     String tags = sb.toString();
-                    int upvote = item.getInt("score");
+                    int upvote = item.getInt("up_vote_count");
                     int views = item.has("view_count") ? item.getInt("view_count") : 0;
                     int userCount = views + 1;
                     insertData(con, ownerId, questionId, isAnswered,
                             answerCount, acceptedAnswerId, questionPostingTime, answerPostingTime
-                            , most_upvote_answer_id, tags, upvote, views, userCount);
+                            , most_upvote_answer_id, tags, upvote, views, userCount,comments);
                 }
                 fetchedCount += items.length();
                 page++;
@@ -156,14 +159,24 @@ public class DataFetch {
                     int mostUpvote = Integer.MIN_VALUE;
                     for (int i = 0; i < items.length(); i++) {
                         JSONObject item = items.getJSONObject(i);
-                        int vote = item.has("score") ? item.getInt("score") : 0;
+                        if (item.has("owner")) {
+                            String ownerId;
+                            JSONObject owner = item.getJSONObject("owner");
+                            if (owner.has("account_id")) {
+                                ownerId = owner.getString("account_id");
+                            } else {
+                                ownerId = owner.getString("display_name");
+                            }
+                            updateOwner(ownerId, "answer");
+                        }
+                        int vote = item.has("up_vote_count") ? item.getInt("up_vote_count") : 0;
                         boolean isAccepted =
                                 item.has("is_accepted") && item.getBoolean("is_accepted");
                         if (isAccepted) {
                             int answerPosting = item.getInt("creation_date");
                             updateData(answerPosting, s);
                             int answerId = item.getInt("answer_id");
-                            updateAnswerId(answerId,s);
+                            updateAnswerId(answerId, s);
                         }
                         if (Math.max(mostUpvote, vote) == vote) {
                             mostUpvoteAnswer = item.getInt("answer_id");
@@ -172,6 +185,48 @@ public class DataFetch {
                     }
                     updateUpvote(mostUpvoteAnswer, s);
                 }
+                for (int m = 1; m < 500; m++) {
+                    int s = getId(m);
+                    if (!getIsCommented(s)) continue;
+                    sort = "creation";
+                    String apiParams = String.format("/comments?order=%s&sort=%s&site=%s",
+                            order, sort, site);
+                    URL url = new URL(apiUrl + "/" + s + apiParams);
+                    HttpURLConnection connection2 = (HttpURLConnection) url.openConnection();
+                    connection2.setRequestMethod("GET");
+                    BufferedReader in;
+                    if ("gzip".equals(connection2.getContentEncoding())) {
+                        in = new BufferedReader(new InputStreamReader(
+                                new GZIPInputStream(connection2.getInputStream())));
+                    } else {
+                        in = new BufferedReader(
+                                new InputStreamReader(connection2.getInputStream()));
+                    }
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                    in.close();
+                    JSONObject json = new JSONObject(response.toString());
+                    JSONArray items = json.getJSONArray("items");
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject item = items.getJSONObject(i);
+                        if (item.has("owner")) {
+                            String ownerId;
+                            JSONObject owner = item.getJSONObject("owner");
+                            if (owner.has("account_id")) {
+                                ownerId = owner.getString("account_id");
+                            } else {
+                                ownerId = owner.getString("display_name");
+                            }
+                            updateOwner(ownerId, "comment");
+                        }
+
+                    }
+                }
+
+
                 closeConnection();
                 System.out.println("Data modification successfully!");
             } catch (IOException e) {
@@ -182,14 +237,16 @@ public class DataFetch {
         }
     }
 
+
+
     private static void insertData(Connection connection, String ownerId, int questionId,
                                    boolean isAnswered, int answerCount,
                                    int acceptedAnswerId, int questionPostingTime, int answerPostingTime,
-                                   int most_upvote_answer_id,
-                                   String tags, int upvote, int views, int userCount) throws SQLException, SQLException {
+                                   int most_upvote_answer_id, String tags,
+                                   int upvote, int views, int userCount, int comments) throws SQLException, SQLException {
         String insertQuery = "INSERT INTO question (owner_id,question_id,is_answered," +
                 "answer_numbers,accepted_answer_id,question_posting_time,answer_posting_time," +
-                "most_upvote_answer_id,tags,upvote,views,user_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                "most_upvote_answer_id,tags,upvote,views,user_count,comment) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
         PreparedStatement statement = connection.prepareStatement(insertQuery);
         statement.setString(1, ownerId);
         statement.setInt(2, questionId);
@@ -203,6 +260,7 @@ public class DataFetch {
         statement.setInt(10, upvote);
         statement.setInt(11, views);
         statement.setInt(12, userCount);
+        statement.setInt(13, comments);
         statement.executeUpdate();
         statement.close();
     }
@@ -242,6 +300,24 @@ public class DataFetch {
         }
         return have;
     }
+    private static boolean getIsCommented(int n) {
+        String sql = "SELECT comment FROM question where question_id = ?";
+        int count = 0;
+        try {
+            PreparedStatement statement = con.prepareStatement(sql);
+            statement.setInt(1, n);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("comment");
+            }
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (count==0)return false;
+        else return true;
+    }
 
 
     public static void updateData(int s, int n) {
@@ -256,6 +332,7 @@ public class DataFetch {
             e.printStackTrace();
         }
     }
+
     public static void updateAnswerId(int s, int n) {
         String sql = " update question set accepted_answer_id =? where question_id=?";
         try {
@@ -279,5 +356,60 @@ public class DataFetch {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void updateOwner(String owner_id, String type) {
+        String sql = " select count(*) from owner where owner_id = ?";
+        int count = 0;
+        try {
+            PreparedStatement preparedStatement = con.prepareStatement(sql);
+            preparedStatement.setString(1, owner_id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt("count");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (count == 0) {
+            String sql1 = "insert into owner(owner_id, question_numbers, answer_numbers, comment_numbers) values (?,?,?,?)";
+            try {
+                PreparedStatement preparedStatement = con.prepareStatement(sql1);
+                preparedStatement.setString(1, owner_id);
+                if (Objects.equals(type, "question")) {
+                    preparedStatement.setInt(2, 1);
+                    preparedStatement.setInt(3, 0);
+                    preparedStatement.setInt(4, 0);
+                } else if (Objects.equals(type, "answer")) {
+                    preparedStatement.setInt(2, 0);
+                    preparedStatement.setInt(3, 1);
+                    preparedStatement.setInt(4, 0);
+                } else if (type.equals("comment")) {
+                    preparedStatement.setInt(2, 0);
+                    preparedStatement.setInt(3, 0);
+                    preparedStatement.setInt(4, 1);
+                }
+                count = preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            String sql2 = null;
+            try {
+                if (Objects.equals(type, "question")) {
+                    sql2 = "update owner set question_numbers = question_numbers+1 where owner_id = ?";
+                } else if (Objects.equals(type, "answer")) {
+                    sql2 = "update owner set answer_numbers = answer_numbers+1 where owner_id = ?";
+                } else if (type.equals("comment")) {
+                    sql2 = "update owner set comment_numbers = comment_numbers+1 where owner_id = ?";
+                }
+                PreparedStatement preparedStatement = con.prepareStatement(sql2);
+                preparedStatement.setString(1, owner_id);
+                count = preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }
