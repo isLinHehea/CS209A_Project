@@ -157,10 +157,8 @@ public class DataFetch {
                     for (int i = 0; i < items.length(); i++) {
                         JSONObject item = items.getJSONObject(i);
                         int vote = item.has("score") ? item.getInt("score") : 0;
-                        ;
                         boolean isAccepted =
                                 item.has("is_accepted") && item.getBoolean("is_accepted");
-                        ;
                         if (isAccepted) {
                             int answerPosting = item.getInt("creation_date");
                             updateData(answerPosting, s);
