@@ -58,7 +58,7 @@ public class DataFetch {
         int pageSize = 100;
         try {
             getConnection();
-            String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s&filter=!6Wfm_gRpwRo5e",
+            String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1",
                 order, sort, tagged, site);
             int page = 1;
             int fetchedCount = 0;
