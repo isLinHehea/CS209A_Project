@@ -1,7 +1,11 @@
 package cse.java2.project;
 
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -14,26 +18,25 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 public class DataStore {
+
     public static void main(String[] args) {
         String pattern = "<code>(.*?)</code>";
         int totalQuestions = 500;
         int questionsPerPage = 100;
         int totalPages = (int) Math.ceil((double) totalQuestions / questionsPerPage);
         Map<String, Integer> apiFrequency = new HashMap<>();
-
         try {
-
             for (int page = 1; page <= totalPages; page++) {
                 String pageUrl = "https://api.stackexchange.com/2.3/questions?page=" + page +
-                        "&pagesize=100&order=desc&sort=activity&tagged=java&site=stackoverflow" +
-                        "&filter=!*Mg4PjfgUpvo9FU5";
+                    "&pagesize=100&order=desc&sort=activity&tagged=java&site=stackoverflow" +
+                    "&filter=!*Mg4PjfgUpvo9FU5";
                 URL url = new URL(pageUrl);
                 HttpURLConnection connection1 = (HttpURLConnection) url.openConnection();
                 connection1.setRequestMethod("GET");
                 BufferedReader in;
                 if ("gzip".equals(connection1.getContentEncoding())) {
                     in = new BufferedReader(
-                            new InputStreamReader(new GZIPInputStream(connection1.getInputStream())));
+                        new InputStreamReader(new GZIPInputStream(connection1.getInputStream())));
                 } else {
                     in = new BufferedReader(new InputStreamReader(connection1.getInputStream()));
                 }
@@ -50,7 +53,6 @@ public class DataStore {
                     extractJavaAPIs(codeSnippet, apiFrequency);
                 }
 
-                // 获取评论和答案中的代码片段
                 JSONObject json = new JSONObject(response.toString());
                 JSONArray items = json.getJSONArray("items");
                 for (int i = 0; i < items.length(); i++) {
@@ -79,18 +81,34 @@ public class DataStore {
                             }
                         }
                     }
-
-
-
-
                 }
             }
-
-            List<Map.Entry<String, Integer>> sortedAPIs = new ArrayList<>(apiFrequency.entrySet());
-            sortedAPIs.sort((a, b) -> b.getValue().compareTo(a.getValue()));
-
-            for (Map.Entry<String, Integer> entry : sortedAPIs) {
-                System.out.println(entry.getKey() + " : " + entry.getValue());
+            String filePath = "src/main/resources/static/js/FrequentlyDiscussedAPIs.js";
+            Map<String, Integer> apiFrequencyFinal = apiFrequency.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(50)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                StringBuilder content = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("let wordcloudRaw =")) {
+                        Map<String, Integer> values = extractValues(line);
+                        values.clear();
+                        values.putAll(apiFrequencyFinal);
+                        String modifiedLine = generateModifiedLine(values);
+                        line = line.replaceFirst("let wordcloudRaw =.*", modifiedLine);
+                    }
+                    content.append(line).append("\n");
+                }
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                    writer.write(content.toString());
+                }
+                System.out.println("JavaScript file modified successfully.");
+            } catch (IOException e) {
+                System.out.println(
+                    "An error occurred while modifying the JavaScript file: " + e.getMessage());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,5 +124,40 @@ public class DataStore {
                 apiFrequency.put(javaAPI, apiFrequency.getOrDefault(javaAPI, 0) + 1);
             }
         }
+    }
+
+    private static Map<String, Integer> extractValues(String line) {
+        Map<String, Integer> values = new HashMap<>();
+
+        // Match key-value pairs within curly braces
+        Pattern pattern = Pattern.compile("\"(.*?)\":\\s*(\\d+)");
+        Matcher matcher = pattern.matcher(line);
+
+        // Extract the key-value pairs and store them in the map
+        while (matcher.find()) {
+            String key = matcher.group(1);
+            int value = Integer.parseInt(matcher.group(2));
+            values.put(key, value);
+        }
+
+        return values;
+    }
+
+    private static String generateModifiedLine(Map<String, Integer> values) {
+        StringBuilder line = new StringBuilder();
+        line.append("let ").append("wordcloudRaw").append(" = {");
+
+        // Generate the modified key-value pairs
+        for (Map.Entry<String, Integer> entry : values.entrySet()) {
+            line.append("\"").append(entry.getKey()).append("\": ").append(entry.getValue())
+                .append(", ");
+        }
+
+        // Remove the trailing comma and space
+        line.delete(line.length() - 2, line.length());
+
+        line.append("}");
+
+        return line.toString();
     }
 }
