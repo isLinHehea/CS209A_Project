@@ -70,7 +70,7 @@ public class DataAnalyze {
         closeConnection();
     }
 
-    private static Map<String, Integer> extractValues(String line) {
+    public static Map<String, Integer> extractValues(String line) {
         Map<String, Integer> values = new HashMap<>();
 
         // Match key-value pairs within curly braces

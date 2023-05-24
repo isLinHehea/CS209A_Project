@@ -58,7 +58,8 @@ public class DataFetch {
         int pageSize = 100;
         try {
             getConnection();
-            String apiParams = String.format("&order=%s&sort=%s&tagged=%s&site=%s&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1",
+            String apiParams = String.format(
+                "&order=%s&sort=%s&tagged=%s&site=%s&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1",
                 order, sort, tagged, site);
             int page = 1;
             int fetchedCount = 0;
@@ -108,7 +109,6 @@ public class DataFetch {
                     for (int j = 0; j < tagArray.length(); j++) {
                         sb.append(tagArray.getString(j));
                         sb.append(",");
-
                     }
                     sb.deleteCharAt(sb.length() - 1);
                     String tags = sb.toString();
@@ -117,7 +117,7 @@ public class DataFetch {
                     int userCount = views + 1;
                     insertData(con, ownerId, questionId, isAnswered,
                         answerCount, acceptedAnswerId, questionPostingTime, answerPostingTime
-                        , most_upvote_answer_id, tags, upvote, views, userCount,comments);
+                        , most_upvote_answer_id, tags, upvote, views, userCount, comments);
                 }
                 fetchedCount += items.length();
                 page++;
@@ -133,7 +133,9 @@ public class DataFetch {
                 getConnection();
                 for (int m = 1; m <= 500; m++) {
                     int s = getId(m);
-                    if (!getIsAnswered(s)) continue;
+                    if (!getIsAnswered(s)) {
+                        continue;
+                    }
                     String apiParams = String.format("/answers?order=%s&sort=%s&site=%s",
                         order, sort, site);
                     URL url = new URL(apiUrl + "/" + s + apiParams);
@@ -187,7 +189,9 @@ public class DataFetch {
                 }
                 for (int m = 1; m < 500; m++) {
                     int s = getId(m);
-                    if (!getIsCommented(s)) continue;
+                    if (!getIsCommented(s)) {
+                        continue;
+                    }
                     sort = "creation";
                     String apiParams = String.format("/comments?order=%s&sort=%s&site=%s",
                         order, sort, site);
@@ -225,8 +229,6 @@ public class DataFetch {
 
                     }
                 }
-
-
                 closeConnection();
                 System.out.println("Data modification successfully!");
             } catch (IOException e) {
@@ -236,7 +238,6 @@ public class DataFetch {
             }
         }
     }
-
 
 
     private static void insertData(Connection connection, String ownerId, int questionId,
@@ -300,6 +301,7 @@ public class DataFetch {
         }
         return have;
     }
+
     private static boolean getIsCommented(int n) {
         String sql = "SELECT comment FROM question where question_id = ?";
         int count = 0;
@@ -315,8 +317,11 @@ public class DataFetch {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (count==0)return false;
-        else return true;
+        if (count == 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
 
@@ -358,9 +363,10 @@ public class DataFetch {
         }
     }
 
-    public static void DataStore(){
+    public static void DataStore() {
 
     }
+
     public static void updateOwner(String owner_id, String type) {
         String sql = " select count(*) from owner where owner_id = ?";
         int count = 0;
