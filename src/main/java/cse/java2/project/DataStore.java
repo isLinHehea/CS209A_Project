@@ -18,6 +18,7 @@ public class DataStore {
         Map<String, Integer> apiFrequency = new HashMap<>();
 
         try {
+
             for (int page = 1; page <= totalPages; page++) {
                 String pageUrl = "https://api.stackexchange.com/2.3/questions?page="+page+"&pagesize=100&order=desc&sort=activity&tagged=java&site=stackoverflow&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1";
                 URL url = new URL(pageUrl);
