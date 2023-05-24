@@ -1,5 +1,9 @@
 package cse.java2.project;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -20,7 +24,9 @@ public class DataStore {
         try {
 
             for (int page = 1; page <= totalPages; page++) {
-                String pageUrl = "https://api.stackexchange.com/2.3/questions?page="+page+"&pagesize=100&order=desc&sort=activity&tagged=java&site=stackoverflow&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1";
+                String pageUrl = "https://api.stackexchange.com/2.3/questions?page=" + page +
+                        "&pagesize=100&order=desc&sort=activity&tagged=java&site=stackoverflow" +
+                        "&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1";
                 URL url = new URL(pageUrl);
                 HttpURLConnection connection1 = (HttpURLConnection) url.openConnection();
                 connection1.setRequestMethod("GET");
@@ -42,6 +48,35 @@ public class DataStore {
                 while (matcher.find()) {
                     String codeSnippet = matcher.group(1);
                     extractJavaAPIs(codeSnippet, apiFrequency);
+                }
+
+                // 获取评论和答案中的代码片段
+                JSONObject json = new JSONObject(response.toString());
+                JSONArray items = json.getJSONArray("items");
+                for (int i = 0; i < items.length(); i++) {
+                    JSONObject item = items.getJSONObject(i);
+                    JSONArray comments = item.getJSONArray("comments");
+                    JSONArray answers = item.getJSONArray("answers");
+
+                    for (int j = 0; j < comments.length(); j++) {
+                        JSONObject commentObject = comments.getJSONObject(j);
+                        String commentText = commentObject.getString("body");
+                        Matcher commentMatcher = codePattern.matcher(commentText);
+                        while (commentMatcher.find()) {
+                            String commentSnippet = commentMatcher.group(1);
+                            extractJavaAPIs(commentSnippet, apiFrequency);
+                        }
+                    }
+
+                    for (int j = 0; j < answers.length(); j++) {
+                        JSONObject answerObject = answers.getJSONObject(j);
+                        String answerText = answerObject.getString("body");
+                        Matcher answerMatcher = codePattern.matcher(answerText);
+                        while (answerMatcher.find()) {
+                            String answerSnippet = answerMatcher.group(1);
+                            extractJavaAPIs(answerSnippet, apiFrequency);
+                        }
+                    }
                 }
             }
 

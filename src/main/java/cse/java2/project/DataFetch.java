@@ -358,6 +358,9 @@ public class DataFetch {
         }
     }
 
+    public static void DataStore(){
+
+    }
     public static void updateOwner(String owner_id, String type) {
         String sql = " select count(*) from owner where owner_id = ?";
         int count = 0;
