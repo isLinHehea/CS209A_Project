@@ -11,7 +11,6 @@ import java.util.zip.GZIPInputStream;
 
 public class DataStore {
     public static void main(String[] args) {
-        String apiUrl = "https://api.stackexchange.com/2.3/questions?page=1&pagesize=100&order=desc&sort=activity&tagged=java&site=stackoverflow&filter=!)5gbzFCpDpqI.hwSxz)_ewjJDfr1";
         String pattern = "<code>(.*?)</code>";
         int totalQuestions = 500;
         int questionsPerPage = 100;
