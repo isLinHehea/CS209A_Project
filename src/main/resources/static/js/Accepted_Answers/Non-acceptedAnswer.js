@@ -1,1 +1,1 @@
-let piechartRaw = {"More Upvotes Non-accepted Answer": 26, "Less Upvotes Non-accepted Answer": 50}
+let piechartRaw = {"More Upvotes Non-accepted Answer": 38, "Less Upvotes Non-accepted Answer": 64}
